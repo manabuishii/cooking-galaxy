@@ -1,4 +1,8 @@
-site :opscode
+source 'http://api.berkshelf.com'
 
-cookbook "python" 
-cookbook "mercurial" 
+cookbook "yum"
+cookbook "python"
+cookbook "mercurial"
+cookbook "vim"
+
+metadata

@@ -15,6 +15,12 @@ user "galaxy" do
     supports :manage_home => true
     action   :create
 end
+# set directory owner and permission mainly for shared file system
+directory node[:galaxy][:home] do
+    owner node[:galaxy][:user]
+    group      node[:galaxy][:group]
+    mode '0755'
+end
 
 include_recipe "python"
 include_recipe "mercurial"
@@ -44,3 +50,5 @@ service "galaxy" do
     action [:enable, :start]
     supports :status => true, :restart => true, :reload => true
 end
+
+

@@ -17,5 +17,8 @@ when "centos"
     default[:galaxy][:initfile]  = "/etc/init.d/galaxy" if( platform_version.to_f < 7.0)
 end
 
-default[:galaxy][:repository]    = "https://bitbucket.org/galaxy/galaxy-dist/"
+#default[:galaxy][:repository]    = "https://bitbucket.org/galaxy/galaxy-dist/"
+default[:galaxy][:repository]    = "https://bitbucket.org/galaxy/galaxy-dist/commits/tag/release_2014.08.11"
 
+# about nginx site proxy settings
+default[:galaxy][:nginxproxysetting] = false
