@@ -9,7 +9,8 @@ when "centos"
     default[:galaxy][:password]  = nil
 
     # path to galaxy systems
-    default[:galaxy][:reference] = "tip"
+    # if you want to use latest version , set reference to 'tip'
+    default[:galaxy][:reference] = "release_2014.08.11"
     default[:galaxy][:path]      = "#{galaxy[:home]}/galaxy-dist"
     default[:galaxy][:config]    = "#{galaxy[:path]}/universe_wsgi.ini"
     default[:galaxy][:port]      = "8080"
@@ -17,8 +18,8 @@ when "centos"
     default[:galaxy][:initfile]  = "/etc/init.d/galaxy" if( platform_version.to_f < 7.0)
 end
 
-#default[:galaxy][:repository]    = "https://bitbucket.org/galaxy/galaxy-dist/"
-default[:galaxy][:repository]    = "https://bitbucket.org/galaxy/galaxy-dist/commits/tag/release_2014.08.11"
+# repository 
+default[:galaxy][:repository]    = "https://bitbucket.org/galaxy/galaxy-dist/"
 
 # about nginx site proxy settings
 default[:galaxy][:nginxproxysetting] = false
