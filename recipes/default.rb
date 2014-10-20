@@ -23,15 +23,59 @@ directory node[:galaxy][:home] do
 end
 
 include_recipe "python"
-include_recipe "mercurial"
-mercurial node[:galaxy][:path] do
-    repository node[:galaxy][:repository]
-    owner      node[:galaxy][:user]
-    group      node[:galaxy][:group]
-    reference  node[:galaxy][:reference]
 
-    action     :clone
+#include_recipe "mercurial"
+#mercurial node[:galaxy][:path] do
+#    repository node[:galaxy][:repository]
+#    owner      node[:galaxy][:user]
+#    group      node[:galaxy][:group]
+#    reference  node[:galaxy][:reference]
+#
+#    action     :clone
+#end
+
+# galaxy main directory
+directory node[:galaxy][:path] do
+    owner node[:galaxy][:user]
+    group      node[:galaxy][:group]
+    mode '0755'
 end
+
+include_recipe "python"
+
+# virtualenv related variables
+virtualenv_home  = node[:galaxy][:path]+"/.venv"
+user_name    = node[:galaxy][:user]
+
+# install
+python_pip "virtualenv" do
+    action :install
+end
+python_virtualenv virtualenv_home do
+  action :create
+  owner node[:galaxy][:user]
+  group node[:galaxy][:group]
+end
+
+python_pip "drmaa" do
+  action :install
+  virtualenv virtualenv_home
+end
+
+#
+sourcecodefile=node[:galaxy][:reference]+".tar.bz2"
+remote_file node[:galaxy][:home]+"/"+sourcecodefile do
+    source "https://bitbucket.org/galaxy/galaxy-dist/get/"+sourcecodefile
+    action :create_if_missing
+
+end
+
+bash "extract file" do
+    code   "tar jxvf #{node[:galaxy][:home]}/#{sourcecodefile} -C #{node[:galaxy][:path]} --strip=1"
+    action :run
+    user node[:galaxy][:user]
+end
+
 
 template "/etc/init.d/galaxy" do
     owner      "root"
