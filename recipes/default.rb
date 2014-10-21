@@ -59,6 +59,8 @@ end
 
 python_pip "drmaa" do
   action :install
+  user node[:galaxy][:user]
+  group node[:galaxy][:group]
   virtualenv virtualenv_home
 end
 
