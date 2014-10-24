@@ -6,13 +6,15 @@
 SERVICE_NAME=galaxy
 RUN_AS=<%= node[:galaxy][:user] %>
 RUN_IN=<%= node[:galaxy][:path] %>
+KICKER=<%= node[:galaxy][:kicker]  %>
+CONFIG=<%= node[:galaxy][:config]  %>
 
 
 #--- main actions
 
 start() {
         echo "Starting $SERVICE_NAME... "
-        cmd="cd $RUN_IN && sh run.sh --daemon"
+        cmd="cd $RUN_IN && sh $KICKER --daemon"
         case "$(id -un)" in
                 $RUN_AS)
                         eval "$cmd"
@@ -31,7 +33,7 @@ start() {
 stop() {
         echo -n "Stopping $SERVICE_NAME... "
 
-        cmd="cd $RUN_IN && sh run.sh --stop-daemon"
+        cmd="cd $RUN_IN && sh $KICKER --stop-daemon"
 
         case "$(id -un)" in
                 $RUN_AS)
@@ -57,7 +59,7 @@ status() {
                         echo "started"
                         return 0
                 fi
-        done < <(ps ax -o 'pid cmd' | grep -P '^\s*\d+ python ./scripts/paster.py serve' | awk '{print $1}')
+        done < <(ps ax -o 'pid cmd' | grep -P '^\s*\d+ python ./scripts/paster.py serve $CONFIG' | awk '{print $1}')
         echo "stopped"
         return 3
 }

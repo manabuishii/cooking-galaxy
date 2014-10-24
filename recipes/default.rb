@@ -2,7 +2,7 @@
 # Cookbook Name:: galaxy
 # Recipe:: default
 #
-# Copyright 2014, YOUR_COMPANY_NAME
+# Copyright 2014, RIKEN ACCC
 #
 # All rights reserved - Do Not Redistribute
 #
@@ -41,11 +41,20 @@ directory node[:galaxy][:path] do
     mode '0755'
 end
 
+# galaxy for sed tools directory
+directory node[:galaxy][:shedtools_path] do
+    owner node[:galaxy][:user]
+    group      node[:galaxy][:group]
+    mode '0755'
+
+    action   :create
+end
+
 include_recipe "python"
 
 # virtualenv related variables
 virtualenv_home  = node[:galaxy][:path]+"/.venv"
-user_name    = node[:galaxy][:user]
+user_name        = node[:galaxy][:user]
 
 # install
 python_pip "virtualenv" do
@@ -88,9 +97,10 @@ template "/etc/init.d/galaxy" do
     action     :create
 end
 bash "add_galaxy_service" do
-    code <<-EOL
-        chkconfig --add galaxy
-    EOL
+    code "chkconfig --add galaxy"
+    user "root"
+
+    action :run
 end
 service "galaxy" do
     action [:enable, :start]
