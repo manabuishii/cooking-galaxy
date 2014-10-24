@@ -7,6 +7,13 @@ postgresql_connection_info = {
   :username => node[:galaxy][:db][:admin][:username],
   :password => node[:galaxy][:db][:admin][:password]
 }
+# grant all privileges on all databases/tables from localhost
+postgresql_database_user node[:galaxy][:db][:databaseusername] do
+  connection postgresql_connection_info
+  password node[:galaxy][:db][:databasepassword]
+  encoding 'utf8'
+  action :create
+end
 # Same create commands, connection info as an external hash
 postgresql_database node[:galaxy][:db][:databasename] do
   connection postgresql_connection_info
@@ -15,10 +22,3 @@ postgresql_database node[:galaxy][:db][:databasename] do
 end
 
 
-# grant all privileges on all databases/tables from localhost
-postgresql_database_user node[:galaxy][:db][:databaseusername] do
-  connection postgresql_connection_info
-  password node[:galaxy][:db][:databasepassword]
-  encoding 'utf8'
-  action :grant
-end
