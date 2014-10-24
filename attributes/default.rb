@@ -23,3 +23,15 @@ default[:galaxy][:repository]    = "https://bitbucket.org/galaxy/galaxy-dist/"
 
 # about nginx site proxy settings
 default[:galaxy][:nginxproxysetting] = false
+
+# galaxy backend database ( default sqlite, mysql and postgresql )
+default[:galaxy][:db][:type] = "sqlite"
+# using mysql and postgresql
+default[:galaxy][:db][:hostname] = "127.0.0.1"
+default[:galaxy][:db][:admin][:username] = "root"
+default[:galaxy][:db][:admin][:password] = "galaxydatabaserootpassword"
+#
+default[:galaxy][:db][:databasename] = "galaxy"
+default[:galaxy][:db][:databaseusername] = "galaxy"
+default[:galaxy][:db][:databasepassword] = "galaxydatabaseuserpassword"
+

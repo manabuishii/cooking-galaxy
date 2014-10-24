@@ -78,6 +78,16 @@ bash "extract file" do
     user node[:galaxy][:user]
 end
 
+# backend database
+case node[:galaxy][:db][:type]
+  when 'sqlite'
+    include_recipe 'galaxy::sqlite'
+  when 'mysql'
+    include_recipe 'galaxy::mysql'
+  when 'postgresql'
+    include_recipe 'galaxy::postgresql'
+end
+
 
 template "/etc/init.d/galaxy" do
     owner      "root"
