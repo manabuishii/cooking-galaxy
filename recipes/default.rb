@@ -79,13 +79,46 @@ bash "extract file" do
 end
 
 # backend database
+galaxy_config_file = node[:galaxy][:config]
+database_setting = node[:galaxy][:db][:databaseusername]+":"+node[:galaxy][:db][:databasepassword]+"@"+node[:galaxy][:db][:hostname]+"/"+node[:galaxy][:db][:databasename]
+database_connection = ""
 case node[:galaxy][:db][:type]
   when 'sqlite'
     include_recipe 'galaxy::sqlite'
   when 'mysql'
     include_recipe 'galaxy::mysql'
+    database_connection = "mysql://"+database_setting
   when 'postgresql'
     include_recipe 'galaxy::postgresql'
+    database_connection = "postgres://"+database_setting
+end
+# create
+bash "build galaxy config" do
+  code   "cd #{node[:galaxy][:path]} ; ./scripts/check_python.py ; ./scripts/common_startup.sh"
+  action :run
+  user node[:galaxy][:user]
+  not_if { ::File.exist?(galaxy_config_file) }
+end
+# database connection setting update
+case node[:galaxy][:db][:type]
+  when 'mysql', 'postgresql'
+    database_connection_line = /^database_connection/
+    ruby_block "insert database_connection line" do
+      block do
+        file = Chef::Util::FileEdit.new(galaxy_config_file)
+        file.insert_line_after_match(/^#database_connection/, "database_connection = "+database_connection)
+        file.write_file
+      end
+      not_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(database_connection_line).any? }
+    end
+    ruby_block "replace database_connection line" do
+      block do
+        file = Chef::Util::FileEdit.new(galaxy_config_file)
+        file.search_file_replace_line(database_connection_line, "database_connection = "+database_connection)
+        file.write_file
+      end
+      only_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(database_connection_line).any? }
+    end
 end
 
 
