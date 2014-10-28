@@ -88,7 +88,7 @@ bash "extract file" do
 end
 
 # backend database
-galaxy_config_file = node[:galaxy][:config]
+galaxy_config_file = node[:galaxy][:path]+"/"+node[:galaxy][:config]
 database_setting = node[:galaxy][:db][:databaseusername]+":"+node[:galaxy][:db][:databasepassword]+"@"+node[:galaxy][:db][:hostname]+"/"+node[:galaxy][:db][:databasename]
 database_connection = ""
 case node[:galaxy][:db][:type]
