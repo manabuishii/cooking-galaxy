@@ -78,13 +78,65 @@ sourcecodefile=node[:galaxy][:reference]+".tar.bz2"
 remote_file node[:galaxy][:home]+"/"+sourcecodefile do
     source "https://bitbucket.org/galaxy/galaxy-dist/get/"+sourcecodefile
     action :create_if_missing
-
 end
 
 bash "extract file" do
     code   "tar jxvf #{node[:galaxy][:home]}/#{sourcecodefile} -C #{node[:galaxy][:path]} --strip=1"
     action :run
     user node[:galaxy][:user]
+    group node[:galaxy][:group]
+end
+
+# backend database
+galaxy_config_file = node[:galaxy][:config]
+database_setting = node[:galaxy][:db][:databaseusername]+":"+node[:galaxy][:db][:databasepassword]+"@"+node[:galaxy][:db][:hostname]+"/"+node[:galaxy][:db][:databasename]
+database_connection = ""
+case node[:galaxy][:db][:type]
+  when 'sqlite'
+    include_recipe 'galaxy::sqlite'
+  when 'mysql'
+    include_recipe 'galaxy::mysql'
+    database_connection = "mysql://"+database_setting
+  when 'postgresql'
+    include_recipe 'galaxy::postgresql'
+    database_connection = "postgresql://"+database_setting
+end
+# create
+bash "build galaxy config" do
+  code   "cd #{node[:galaxy][:path]} ; python ./scripts/check_python.py ; ./scripts/common_startup.sh"
+  action :run
+  user node[:galaxy][:user]
+  group node[:galaxy][:group]
+  not_if { ::File.exist?(galaxy_config_file) }
+end
+# database connection setting update
+case node[:galaxy][:db][:type]
+  when 'mysql', 'postgresql'
+    database_connection_line = /^database_connection/
+    ruby_block "insert database_connection line" do
+      block do
+        file = Chef::Util::FileEdit.new(galaxy_config_file)
+        file.insert_line_after_match(/^#database_connection/, "database_connection = "+database_connection)
+        file.write_file
+      end
+      not_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(database_connection_line).any? }
+    end
+    ruby_block "replace database_connection line" do
+      block do
+        file = Chef::Util::FileEdit.new(galaxy_config_file)
+        file.search_file_replace_line(database_connection_line, "database_connection = "+database_connection)
+        file.write_file
+      end
+      only_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(database_connection_line).any? }
+    end
+end
+# setup dataase
+bash "setup galaxy database" do
+  code   "cd #{node[:galaxy][:path]} ; ./create_db.sh"
+  action :run
+  user node[:galaxy][:user]
+  group node[:galaxy][:group]
+  environment 'HOME' => node[:galaxy][:home]
 end
 
 
