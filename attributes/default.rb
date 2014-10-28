@@ -45,4 +45,6 @@ default[:galaxy][:db][:admin][:password] = "galaxydatabaserootpassword"
 default[:galaxy][:db][:databasename] = "galaxy"
 default[:galaxy][:db][:databaseusername] = "galaxy"
 default[:galaxy][:db][:databasepassword] = "galaxydatabaseuserpassword"
+# admin_users line settings
+default[:galaxy][:admin_users] = ""
 

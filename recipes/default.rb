@@ -140,6 +140,28 @@ bash "setup galaxy database" do
   environment 'HOME' => node[:galaxy][:home]
 end
 
+#setup admin
+admin_users = node[:galaxy][:admin_users]
+if admin_users != ""
+  admin_users_line = /^admin_users/
+  ruby_block "insert admin_users line" do
+    block do
+      file = Chef::Util::FileEdit.new(galaxy_config_file)
+      file.insert_line_after_match(/^#admin_users/, "admin_users = "+admin_users)
+      file.write_file
+    end
+    not_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(admin_users_line).any? }
+  end
+  ruby_block "replace admin_users line" do
+    block do
+      file = Chef::Util::FileEdit.new(galaxy_config_file)
+      file.search_file_replace_line(admin_users_line, "admin_users = "+admin_users)
+      file.write_file
+    end
+    only_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(admin_users_line).any? }
+  end
+end
+
 
 template "/etc/init.d/galaxy" do
     owner      "root"
