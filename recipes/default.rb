@@ -69,13 +69,13 @@ sourcecodefile=node[:galaxy][:reference]+".tar.bz2"
 remote_file node[:galaxy][:home]+"/"+sourcecodefile do
     source "https://bitbucket.org/galaxy/galaxy-dist/get/"+sourcecodefile
     action :create_if_missing
-
 end
 
 bash "extract file" do
     code   "tar jxvf #{node[:galaxy][:home]}/#{sourcecodefile} -C #{node[:galaxy][:path]} --strip=1"
     action :run
     user node[:galaxy][:user]
+    group node[:galaxy][:group]
 end
 
 # backend database
@@ -90,13 +90,14 @@ case node[:galaxy][:db][:type]
     database_connection = "mysql://"+database_setting
   when 'postgresql'
     include_recipe 'galaxy::postgresql'
-    database_connection = "postgres://"+database_setting
+    database_connection = "postgresql://"+database_setting
 end
 # create
 bash "build galaxy config" do
-  code   "cd #{node[:galaxy][:path]} ; ./scripts/check_python.py ; ./scripts/common_startup.sh"
+  code   "cd #{node[:galaxy][:path]} ; python ./scripts/check_python.py ; ./scripts/common_startup.sh"
   action :run
   user node[:galaxy][:user]
+  group node[:galaxy][:group]
   not_if { ::File.exist?(galaxy_config_file) }
 end
 # database connection setting update
@@ -119,6 +120,14 @@ case node[:galaxy][:db][:type]
       end
       only_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(database_connection_line).any? }
     end
+end
+# setup dataase
+bash "setup galaxy database" do
+  code   "cd #{node[:galaxy][:path]} ; ./create_db.sh"
+  action :run
+  user node[:galaxy][:user]
+  group node[:galaxy][:group]
+  environment 'HOME' => node[:galaxy][:home]
 end
 
 
