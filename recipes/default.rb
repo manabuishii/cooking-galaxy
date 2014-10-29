@@ -66,11 +66,14 @@ python_virtualenv virtualenv_home do
   group node[:galaxy][:group]
 end
 
-python_pip "drmaa" do
-  action :install
-  user node[:galaxy][:user]
-  group node[:galaxy][:group]
-  virtualenv virtualenv_home
+case node[:galaxy][:cluster][:type]
+when 'sge'
+  python_pip "drmaa" do
+    action :install
+    user node[:galaxy][:user]
+    group node[:galaxy][:group]
+    virtualenv virtualenv_home
+  end
 end
 
 #
@@ -162,6 +165,36 @@ if admin_users != ""
   end
 end
 
+# setup compute cluster (job scheduler)
+case node[:galaxy][:cluster][:type]
+when 'sge'
+  job_config_file_line = /^job_config_file/
+  job_config_file = node = node[:galasy][:cluster][:jobconfigfile]
+  ruby_block "insert job_config_file line" do
+    block do
+      file = Chef::Util::FileEdit.new(galaxy_config_file)
+      file.insert_line_after_match(/^#job_config_file/, "job_config_file = "+job_config_file)
+      file.write_file
+    end
+    not_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(job_config_file_line).any? }
+  end
+  ruby_block "replace job_config_file line" do
+    block do
+      file = Chef::Util::FileEdit.new(galaxy_config_file)
+      file.search_file_replace_line(job_config_file_line, "job_config_file = "+job_config_file)
+      file.write_file
+    end
+    only_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(job_config_file_line).any? }
+  end
+  # job_conf.xml
+  template node[:galaxy][:path]+"/"+node[:galasy][:cluster][:jobconfigfile] do
+    owner      node[:galaxy][:user]
+    group      node[:galaxy][:group]
+    mode       "0644"
+    source     "job_conf.xml.erb"
+    action     :create
+  end
+end
 
 template "/etc/init.d/galaxy" do
     owner      "root"
