@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<job_conf>
+    <plugins>
+        <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4"/>
+        <plugin id="sge" type="runner" load="galaxy.jobs.runners.drmaa:DRMAAJobRunner"/>
+    </plugins>
+
+    <handlers default="handlers">
+        <handler id="handler0" tags="handlers"/>
+        <handler id="handler1" tags="handlers"/>
+    </handlers>
+    <destinations default="sge_default">
+        <destination id="local" runner="local"/>
+        <destination id="sge_default" runner="sge">
+          <param id="nativeSpecification"><%= node[:galaxy][:cluster][:drmaa][:nativeSpecification] %></param>
+        </destination>
+    </destinations>
+</job_conf>

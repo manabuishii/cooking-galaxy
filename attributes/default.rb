@@ -48,3 +48,9 @@ default[:galaxy][:db][:databasepassword] = "galaxydatabaseuserpassword"
 # admin_users line settings
 default[:galaxy][:admin_users] = ""
 
+# jobs on a compute cluster
+# type "None" is not use cluster. 
+#      "sge" is sun gridengine. sge using drmaa
+default[:galasy][:cluster][:type] = "None"
+default[:galasy][:cluster][:jobconfigfile] = "job_conf.xml"
+default[:galaxy][:cluster][:drmaa][:nativeSpecification] = "-b n"
