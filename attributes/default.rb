@@ -22,7 +22,7 @@ when "centos"
     default[:galaxy][:admin]     = "galaxy-admin"
     default[:galaxy][:domain]    = "foo.baa"
     # with tool shed, for the galaxy-admin's settins
-    default[:galaxy][:shedtools_path]       = "#{galaxy[:home]}/shed_tool"
+    default[:galaxy][:shedtools_path]       = "#{galaxy[:home]}/shed_tools"
     default[:galaxy][:shedtools_config]     = "#{galaxy[:path]}/shed_tool_conf.xml"
 
     default[:galaxy][:initfile]  = "/etc/init.d/galaxy" if( platform_version.to_f < 7.0)
