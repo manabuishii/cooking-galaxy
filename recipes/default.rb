@@ -169,7 +169,7 @@ end
 case node[:galaxy][:cluster][:type]
 when 'sge'
   job_config_file_line = /^job_config_file/
-  job_config_file = node = node[:galasy][:cluster][:jobconfigfile]
+  job_config_file = node[:galasy][:cluster][:jobconfigfile]
   ruby_block "insert job_config_file line" do
     block do
       file = Chef::Util::FileEdit.new(galaxy_config_file)
