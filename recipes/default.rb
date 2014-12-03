@@ -165,6 +165,28 @@ if admin_users != ""
   end
 end
 
+# setup master_api_key
+master_api_key = node[:galaxy][:master_api_key]
+if master_api_key != nil and master_api_key != ""
+  master_api_key_line = /^master_api_key/
+  ruby_block "insert master_api_key line" do
+    block do
+      file = Chef::Util::FileEdit.new(galaxy_config_file)
+      file.insert_line_after_match(/^#master_api_key/, "master_api_key = "+master_api_key)
+      file.write_file
+    end
+    not_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(master_api_key_line).any? }
+  end
+  ruby_block "replace master_api_key line" do
+    block do
+      file = Chef::Util::FileEdit.new(galaxy_config_file)
+      file.search_file_replace_line(master_api_key_line, "master_api_key = "+master_api_key)
+      file.write_file
+    end
+    only_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(master_api_key_line).any? }
+  end
+end
+
 # setup compute cluster (job scheduler)
 case node[:galaxy][:cluster][:type]
 when 'sge'
