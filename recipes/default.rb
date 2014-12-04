@@ -142,28 +142,41 @@ bash "setup galaxy database" do
   group node[:galaxy][:group]
   environment 'HOME' => node[:galaxy][:home]
 end
-
-#setup admin
-admin_users = node[:galaxy][:admin_users]
-if admin_users != ""
-  admin_users_line = /^admin_users/
-  ruby_block "insert admin_users line" do
-    block do
-      file = Chef::Util::FileEdit.new(galaxy_config_file)
-      file.insert_line_after_match(/^#admin_users/, "admin_users = "+admin_users)
-      file.write_file
+#
+# target_file: file which you want manipulate
+# target_line_prefix: target line prefix (eg. /^#admin_users/ )
+# desired_line_prefix: desired line prefix (eg. /^admin_users/ )
+# desired_line: desired line line (eg. "admin_users = admin@example.com" )
+def insert_or_replace_line(target_file, target_line_prefix,desired_line_prefix, desired_line)
+  if desired_line != nil
+    ruby_block "insert line" do
+      block do
+        file = Chef::Util::FileEdit.new(target_file)
+        file.insert_line_after_match(target_line_prefix, desired_line)
+        file.write_file
+      end
+      not_if { ::File.exist?(target_file) && ::File.readlines(target_file).grep(desired_line_prefix).any? }
     end
-    not_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(admin_users_line).any? }
-  end
-  ruby_block "replace admin_users line" do
-    block do
-      file = Chef::Util::FileEdit.new(galaxy_config_file)
-      file.search_file_replace_line(admin_users_line, "admin_users = "+admin_users)
-      file.write_file
+    ruby_block "replace line" do
+      block do
+        file = Chef::Util::FileEdit.new(target_file)
+        file.search_file_replace_line(desired_line_prefix, desired_line)
+        file.write_file
+      end
+      only_if { ::File.exist?(target_file) && ::File.readlines(target_file).grep(desired_line_prefix).any? }
     end
-    only_if { ::File.exist?(galaxy_config_file) && ::File.readlines(galaxy_config_file).grep(admin_users_line).any? }
   end
 end
+
+# setup admin
+admin_users = node[:galaxy][:admin_users]
+insert_or_replace_line(galaxy_config_file, /^#admin_users/, /^admin_users/, "admin_users = "+admin_users)
+# setup master_api_key
+master_api_key = node[:galaxy][:master_api_key]
+insert_or_replace_line(galaxy_config_file, /^#master_api_key/, /^master_api_key/, "master_api_key = "+master_api_key)
+# setup tool_dependency_dir
+tool_dependency_dir = node[:galaxy][:tool_dependency_dir]
+insert_or_replace_line(galaxy_config_file, /^#tool_dependency_dir/, /^tool_dependency_dir/, "tool_dependency_dir = "+tool_dependency_dir)
 
 # setup compute cluster (job scheduler)
 case node[:galaxy][:cluster][:type]

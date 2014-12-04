@@ -45,8 +45,12 @@ default[:galaxy][:db][:admin][:password] = "galaxydatabaserootpassword"
 default[:galaxy][:db][:databasename] = "galaxy"
 default[:galaxy][:db][:databaseusername] = "galaxy"
 default[:galaxy][:db][:databasepassword] = "galaxydatabaseuserpassword"
-# admin_users line settings
-default[:galaxy][:admin_users] = ""
+# admin_users line settings, if this value is nil do not set admin_users
+default[:galaxy][:admin_users] = nil
+# master_api_key line settings, if this value is nil do not set master_api_key
+default[:galaxy][:master_api_key] = nil
+# tool_dependency_dir line settings, if this value is nil do not set master_api_key
+default[:galaxy][:tool_dependency_dir] = nil
 
 # jobs on a compute cluster
 # type "None" is not use cluster. 
