@@ -97,12 +97,12 @@ database_setting = node[:galaxy][:db][:databaseusername]+":"+node[:galaxy][:db][
 database_connection = ""
 case node[:galaxy][:db][:type]
   when 'sqlite'
-    include_recipe 'cooking-galaxy::sqlite'
+    include_recipe 'galaxy::sqlite'
   when 'mysql'
-    include_recipe 'cooking-galaxy::mysql'
+    include_recipe 'galaxy::mysql'
     database_connection = "mysql://"+database_setting
   when 'postgresql'
-    include_recipe 'cooking-galaxy::postgresql'
+    include_recipe 'galaxy::postgresql'
     database_connection = "postgresql://"+database_setting
 end
 # create
