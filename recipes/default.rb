@@ -170,13 +170,19 @@ end
 
 # setup admin
 admin_users = node[:galaxy][:admin_users]
-insert_or_replace_line(galaxy_config_file, /^#admin_users/, /^admin_users/, "admin_users = "+admin_users)
+if admin_users != nil
+  insert_or_replace_line(galaxy_config_file, /^#admin_users/, /^admin_users/, "admin_users = "+admin_users)
+end
 # setup master_api_key
 master_api_key = node[:galaxy][:master_api_key]
-insert_or_replace_line(galaxy_config_file, /^#master_api_key/, /^master_api_key/, "master_api_key = "+master_api_key)
+if master_api_key != nil
+  insert_or_replace_line(galaxy_config_file, /^#master_api_key/, /^master_api_key/, "master_api_key = "+master_api_key)
+end
 # setup tool_dependency_dir
 tool_dependency_dir = node[:galaxy][:tool_dependency_dir]
-insert_or_replace_line(galaxy_config_file, /^#tool_dependency_dir/, /^tool_dependency_dir/, "tool_dependency_dir = "+tool_dependency_dir)
+if tool_dependency_dir != nil
+  insert_or_replace_line(galaxy_config_file, /^#tool_dependency_dir/, /^tool_dependency_dir/, "tool_dependency_dir = "+tool_dependency_dir)
+end
 
 # setup compute cluster (job scheduler)
 case node[:galaxy][:cluster][:type]
